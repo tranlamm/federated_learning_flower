@@ -1,0 +1,7 @@
+.venv/
+GQUIC_small/
+**/__pycache__/
+**/*.pkl
+**/data
+latex
+client/data
