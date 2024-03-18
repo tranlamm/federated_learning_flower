@@ -1,33 +1,39 @@
+import sys
+if len(sys.argv) < 3:
+    print("Not enough argument!")
+    exit(0)
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
 this_dir = Path.cwd()
-
-# output_dir = this_dir / "cifar10_saved_new"
-# save_dir = this_dir / "cifar10_result_new"
-# list_method = ["cifar10_dql_ucb1", 
-#                "cifar_10_raw_50", 
-#                "cifar_10_raw_100", 
-#                "cifar_10_raw_150", 
-#                "cifar10_dql_epsilon_greedy", 
-#                "cifar10_dql_softmax", 
-#                "cifar_10_ddpg_epsilon_greedy",
-#                "cifar_10_ddpg_ucb1",
-#             #    "cifar_10_ppo",
-#                "cifar_10_sac"]
-
-output_dir = this_dir / "gquic256_saved_new"
-save_dir = this_dir / "gquic256_result"
-list_method = ["gquic256_raw_50", 
-               "gquic_256_raw_100s_", 
-               "gquic_256_raw_150s_", 
-               "gquic256_dql_epsilon_greedy", 
-               "gquic256_ddpg_ucb1", 
-               "gquic256_ddpg_epsilon_greedy", 
-               "gquic256_sac",
-               "gquic256_ppo"]
+isFull = int(sys.argv[1])
+isCifar = int(sys.argv[2])
+if not isCifar:
+    output_dir = this_dir / "gquic256_saved_new"
+    if (isFull):
+        save_dir = this_dir / "final_result" / "full" / "gquic256_all"
+    else:
+        save_dir = this_dir / "final_result" / "zoom" / "gquic256_all"
+    list_method = ["gquic256_dql_epsilon_greedy", 
+                "gquic256_ddpg_ucb1", 
+                "gquic256_ddpg_epsilon_greedy", 
+                "gquic256_sac",
+                "gquic256_ppo"]
+else:
+    output_dir = this_dir / "cifar10_saved_new"
+    if (isFull):
+        save_dir = this_dir / "final_result" / "full" / "cifar10_all"
+    else:
+        save_dir = this_dir / "final_result" / "zoom" / "cifar10_all"
+    list_method = ["cifar10_dql_ucb1", 
+               "cifar10_dql_epsilon_greedy", 
+               "cifar10_dql_softmax", 
+               "cifar_10_ddpg_epsilon_greedy",
+               "cifar_10_ddpg_ucb1",
+               "cifar_10_ppo",
+               "cifar_10_sac"]
 
 fig_loss, f_loss = plt.subplots(figsize=(10,6))
 fig_acc, f_acc = plt.subplots(figsize=(10,6))
@@ -69,18 +75,36 @@ for method in list_method:
 f_loss.set_xlabel('Time')
 f_loss.set_ylabel('Loss')
 f_loss.set_title('Training Loss')
+if not isFull:
+    if not isCifar:
+        f_loss.set_ylim(0.0148, 0.017)
+    else:
+        f_loss.set_ylim(0, 0.01)
+        f_loss.set_xlim(10000)
 f_loss.legend()
 fig_loss.savefig(save_dir / "training_loss.png")
 
 f_acc.set_xlabel('Time')
 f_acc.set_ylabel('Acc')
 f_acc.set_title('Training acc')
+if not isFull:
+    if not isCifar:
+        f_acc.set_ylim(0.85, 1)
+    else:
+        f_acc.set_ylim(0.8, 1.01)
+        f_acc.set_xlim(10000)
 f_acc.legend()
 fig_acc.savefig(save_dir / "training_acc.png")
 
 f_reward.set_xlabel('Time')
 f_reward.set_ylabel('Reward')
 f_reward.set_title('Training reward')
+if not isFull:
+    if not isCifar:
+        f_reward.set_ylim(-0.017, -0.015)
+    else:
+        f_reward.set_ylim(-0.0075, 0)
+        f_reward.set_xlim(10000)
 f_reward.legend()
 fig_reward.savefig(save_dir / "training_reward.png")
 

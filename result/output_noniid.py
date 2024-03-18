@@ -5,29 +5,31 @@ from pathlib import Path
 
 this_dir = Path.cwd()
 
-# output_dir = this_dir / "cifar10_saved_new"
-# save_dir = this_dir / "cifar10_result_new"
-# list_method = ["cifar10_dql_ucb1", 
-#                "cifar_10_raw_50", 
-#                "cifar_10_raw_100", 
-#                "cifar_10_raw_150", 
-#                "cifar10_dql_epsilon_greedy", 
-#                "cifar10_dql_softmax", 
-#                "cifar_10_ddpg_epsilon_greedy",
-#                "cifar_10_ddpg_ucb1",
-#             #    "cifar_10_ppo",
-#                "cifar_10_sac"]
+output_dir = this_dir / "cifar10_saved_new"
+save_dir = this_dir / "final_result" / "non_iid"
+list_method = [
+            #    "cifar_10_raw_50", 
+            #    "cifar_10_raw_100", 
+            #    "cifar_10_raw_150", 
+               "cifar10_raw_50_noniid_quantity_skew", 
+               "cifar10_raw_100_noniid_quantity_skew", 
+               "cifar10_raw_150_noniid_quantity_skew",
+               "cifar10_raw_50_noniid_label_skew",
+               "cifar10_raw_100_noniid_label_skew",
+               "cifar10_raw_150_noniid_label_skew",
+               "cifar10_ppo_noniid_label_skew"
+               ]
 
-output_dir = this_dir / "gquic256_saved_new"
-save_dir = this_dir / "gquic256_result"
-list_method = ["gquic256_raw_50", 
-               "gquic_256_raw_100s_", 
-               "gquic_256_raw_150s_", 
-               "gquic256_dql_epsilon_greedy", 
-               "gquic256_ddpg_ucb1", 
-               "gquic256_ddpg_epsilon_greedy", 
-               "gquic256_sac",
-               "gquic256_ppo"]
+# output_dir = this_dir / "gquic256_saved_new"
+# save_dir = this_dir / "gquic256_result"
+# list_method = ["gquic256_raw_50", 
+#                "gquic_256_raw_100s_", 
+#                "gquic_256_raw_150s_", 
+#                "gquic256_dql_epsilon_greedy", 
+#                "gquic256_ddpg_ucb1", 
+#                "gquic256_ddpg_epsilon_greedy", 
+#                "gquic256_sac",
+#                "gquic256_ppo"]
 
 fig_loss, f_loss = plt.subplots(figsize=(10,6))
 fig_acc, f_acc = plt.subplots(figsize=(10,6))
@@ -69,18 +71,21 @@ for method in list_method:
 f_loss.set_xlabel('Time')
 f_loss.set_ylabel('Loss')
 f_loss.set_title('Training Loss')
+# f_loss.set_ylim(-0.0005, 0.02)
 f_loss.legend()
 fig_loss.savefig(save_dir / "training_loss.png")
 
 f_acc.set_xlabel('Time')
 f_acc.set_ylabel('Acc')
 f_acc.set_title('Training acc')
+# f_acc.set_ylim(0.5, 1.01)
 f_acc.legend()
 fig_acc.savefig(save_dir / "training_acc.png")
 
 f_reward.set_xlabel('Time')
 f_reward.set_ylabel('Reward')
 f_reward.set_title('Training reward')
+# f_reward.set_ylim(-0.02, 0.0001)
 f_reward.legend()
 fig_reward.savefig(save_dir / "training_reward.png")
 

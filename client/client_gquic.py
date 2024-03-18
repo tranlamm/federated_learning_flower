@@ -19,6 +19,9 @@ import warnings
 from randomUtils import *
 import flwr as fl
 import random
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
 random.seed(99)
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -48,6 +51,50 @@ train_dir = '../GQUIC_small/Train/GQUIC_train_' + byte_number + '.feather'
 test_dir = '../GQUIC_small/Test/GQUIC_test_' + byte_number + '.feather'
 data = pd.read_feather(train_dir)
 test = pd.read_feather(test_dir)
+
+def printNumberOfSample(label_set):
+    if (CLIENT_INDEX == 0):
+        sample_record = []
+        for client_index, _ in enumerate(label_set):
+            client_record = []
+            num_labels = {label: 0 for label in range(NUM_CLASSES)}
+            for label in label_set[client_index]:
+                num_labels[label] += 1
+            for _, value in num_labels.items():
+                client_record.append(value)
+            sample_record.append(client_record)
+        sample_record = np.array(sample_record)
+        
+        # Print
+        clients = [f'Client {i}' for i in range(NUM_CLIENTS)]
+        classes = [f'Class {i}' for i in range(NUM_CLASSES)]
+        fig, ax = plt.subplots(figsize=(10,6))
+
+        # Plot each category as a stacked bar
+        bottom = np.zeros(NUM_CLIENTS)
+        colors = [generate_random_color() for _ in range(NUM_CLASSES)]
+        for i in range(NUM_CLASSES):
+            ax.bar(clients, sample_record[:, i], bottom=bottom, label=f'{classes[i]}', color=colors[i])
+            bottom += sample_record[:, i]
+
+        # Customize plot
+        ax.set_xlabel('Clients')
+        ax.set_ylabel('Samples')
+        ax.set_title('Client datasets distribution')
+        ax.legend()
+        plt.xticks(rotation=45)
+        this_dir = Path.cwd()
+        save_dir = this_dir / "client_sample"
+        label = None
+        match SCENARIO:
+            case 1:
+                label = "iid"
+            case 2:
+                label = "quantity_skew"
+            case _:
+                label = "label_skew" 
+                
+        fig.savefig(save_dir / str("gquic256_" + label + ".png"))
 
 def most_frequent(List):
     return max(set(List), key=List.count)
@@ -80,9 +127,17 @@ x_test, y_test = load_data_set(test, 33)
 
 def crop(x_train, y_train):
     length = x_train.shape[0] // NUM_CLIENTS
-    x_train = x_train[CLIENT_INDEX*length:(CLIENT_INDEX + 1)*length]
-    y_train = y_train[CLIENT_INDEX*length:(CLIENT_INDEX + 1)*length]
-    return x_train, y_train
+    subX = []
+    subY = []
+    start_index = 0
+    for _ in range(NUM_CLIENTS):
+        subarrayX = x_train[start_index:start_index+length]
+        subX.append(subarrayX)
+        subarrayY = y_train[start_index:start_index+length]
+        subY.append(subarrayY)
+        start_index += length
+    printNumberOfSample(subY)
+    return subX[CLIENT_INDEX], subY[CLIENT_INDEX]
 
 def quantity_skew(x_train, y_train):
     lengths = quantitySkew(x_train.shape[0], NUM_CLIENTS)
@@ -95,6 +150,7 @@ def quantity_skew(x_train, y_train):
         subarrayY = y_train[start_index:start_index+num]
         subY.append(subarrayY)
         start_index += num
+    printNumberOfSample(subY)
     return subX[CLIENT_INDEX], subY[CLIENT_INDEX]
 
 def label_skew(x_train, y_train):
@@ -110,6 +166,7 @@ def label_skew(x_train, y_train):
         group_samples_X[group_id].append(x_train[i])
         group_samples_Y[group_id].append(y_train[i])
     
+    printNumberOfSample(group_samples_Y)
     return np.array(group_samples_X[CLIENT_INDEX]), np.array(group_samples_Y[CLIENT_INDEX])
 
 if (SCENARIO == SCENARIO_IID):
@@ -122,6 +179,7 @@ else:
     x_train, y_train = label_skew(x_train, y_train)
     x_test, y_test = label_skew(x_test, y_test)
 
+exit(0)
 def to_tensor(x_train, y_train):
     tensor_x = torch.Tensor(x_train) # transform to torch tensor
     tensor_y = torch.Tensor(y_train)
@@ -132,6 +190,10 @@ def to_tensor(x_train, y_train):
 
 train_set = to_tensor(x_train, y_train)
 test_set = to_tensor(x_test, y_test)
+
+print(y_train)
+print(x_train.shape)
+exit(0)
 
 def load_datasets(train_set, test_set):
     trainloader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True)

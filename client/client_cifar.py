@@ -19,6 +19,9 @@ import warnings
 from randomUtils import *
 import flwr as fl
 import random
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
 random.seed(99)
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -43,6 +46,50 @@ transform = transforms.Compose(
 trainset = CIFAR10("./data", train=True, download=True, transform=transform)
 testset = CIFAR10("./data", train=False, download=True, transform=transform)
 
+def printNumberOfSample(train_datasets):
+    if (CLIENT_INDEX == 0):
+        sample_record = []
+        for client_index, _ in enumerate(train_datasets):
+            client_record = []
+            num_labels = {label: 0 for label in range(NUM_CLASSES)}
+            for sample, label in train_datasets[client_index]:
+                num_labels[label] += 1
+            for key, value in num_labels.items():
+                client_record.append(value)
+            sample_record.append(client_record)
+        sample_record = np.array(sample_record)
+        
+        # Print
+        clients = [f'Client {i}' for i in range(NUM_CLIENTS)]
+        classes = [f'Class {i}' for i in range(NUM_CLASSES)]
+        fig, ax = plt.subplots(figsize=(10,6))
+
+        # Plot each category as a stacked bar
+        bottom = np.zeros(NUM_CLIENTS)
+        colors = [generate_random_color() for _ in range(NUM_CLASSES)]
+        for i in range(NUM_CLASSES):
+            ax.bar(clients, sample_record[:, i], bottom=bottom, label=f'{classes[i]}', color=colors[i])
+            bottom += sample_record[:, i]
+
+        # Customize plot
+        ax.set_xlabel('Clients')
+        ax.set_ylabel('Samples')
+        ax.set_title('Client datasets distribution')
+        ax.legend()
+        plt.xticks(rotation=45)
+        this_dir = Path.cwd()
+        save_dir = this_dir / "client_sample"
+        label = None
+        match SCENARIO:
+            case 1:
+                label = "iid"
+            case 2:
+                label = "quantity_skew"
+            case _:
+                label = "label_skew" 
+                
+        fig.savefig(save_dir / str("cifar10_" + label + ".png"))
+
 trainloader = None
 testloader = None
 if (SCENARIO == SCENARIO_IID):
@@ -56,6 +103,8 @@ if (SCENARIO == SCENARIO_IID):
 
     trainloader = DataLoader(train_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
     testloader = DataLoader(test_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE)
+    printNumberOfSample(train_datasets)
+    exit(0)
     
 elif (SCENARIO == SCENARIO_Quantity_Skew):
     lengths = quantitySkew(len(trainset), NUM_CLIENTS)
@@ -66,6 +115,8 @@ elif (SCENARIO == SCENARIO_Quantity_Skew):
 
     trainloader = DataLoader(train_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
     testloader = DataLoader(test_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE)
+    printNumberOfSample(train_datasets)
+    exit(0)
     
 else:
     group_samples_train = [[] for _ in range(NUM_CLIENTS)]
@@ -89,7 +140,9 @@ else:
         
     trainloader = DataLoader(group_samples_train[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
     testloader = DataLoader(group_samples_test[CLIENT_INDEX], batch_size=BATCH_SIZE)
-
+    printNumberOfSample(group_samples_train)
+    exit(0)
+    
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()

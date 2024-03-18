@@ -1,7 +1,9 @@
 import math
 import numpy as np
+import random
 
 np.random.seed(99)
+random.seed(99)
 def quantitySkew(numberSample, numberClient):
     minSample = math.floor(0.1 / numberClient * numberSample) 
     remaining_elements = numberSample - numberClient * minSample
@@ -15,3 +17,11 @@ def quantitySkew(numberSample, numberClient):
         group_sizes[np.random.choice(integers, p=probabilities)] += 1
     return group_sizes
     
+def generate_random_color():
+    """
+    Generate a random color in hexadecimal format.
+    """
+    r = random.randint(0, 255)
+    g = random.randint(0, 255)
+    b = random.randint(0, 255)
+    return "#{:02x}{:02x}{:02x}".format(r, g, b)
