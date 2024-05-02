@@ -43,6 +43,7 @@ SCENARIO = int(sys.argv[4])
 SCENARIO_IID = int(1)
 SCENARIO_Quantity_Skew = int(2)
 SCENARIO_Label_Skew = int(3)
+SCENARIO_Cluster_Skew = int(4)
 
 # Load datasets
 # train_dir = '../../../../GQUIC_small/Train/GQUIC_train_' + byte_number + '.feather'
@@ -91,8 +92,10 @@ def printNumberOfSample(label_set):
                 label = "iid"
             case 2:
                 label = "quantity_skew"
-            case _:
+            case 3:
                 label = "label_skew" 
+            case _:
+                label = "cluster_skew" 
                 
         fig.savefig(save_dir / str("gquic256_" + label + ".png"))
 
@@ -169,17 +172,38 @@ def label_skew(x_train, y_train):
     printNumberOfSample(group_samples_Y)
     return np.array(group_samples_X[CLIENT_INDEX]), np.array(group_samples_Y[CLIENT_INDEX])
 
+def cluster_skew(x_train, y_train):
+    classRate = [1, 0.3, 0.85, 0.3, 0.3]
+    
+    group_samples_X = [[] for _ in range(NUM_CLIENTS)]
+    group_samples_Y = [[] for _ in range(NUM_CLIENTS)]
+    
+    # Group samples by label for train set
+    for i, label in enumerate(y_train):
+        if (random.random() < classRate[label]):
+            if (random.random() > 0.5):
+                group_id = label % NUM_CLIENTS  # Assign the group based on the label
+            else:
+                group_id = random.randint(0, NUM_CLIENTS - 1)
+            group_samples_X[group_id].append(x_train[i])
+            group_samples_Y[group_id].append(y_train[i])
+    
+    printNumberOfSample(group_samples_Y)
+    return np.array(group_samples_X[CLIENT_INDEX]), np.array(group_samples_Y[CLIENT_INDEX])
+
 if (SCENARIO == SCENARIO_IID):
     x_train, y_train = crop(x_train, y_train)
     x_test, y_test = crop(x_test, y_test)
 elif (SCENARIO == SCENARIO_Quantity_Skew):
     x_train, y_train = quantity_skew(x_train, y_train)
     x_test, y_test = quantity_skew(x_test, y_test)
-else:
+elif (SCENARIO == SCENARIO_Label_Skew):
     x_train, y_train = label_skew(x_train, y_train)
     x_test, y_test = label_skew(x_test, y_test)
+else:
+    x_train, y_train = cluster_skew(x_train, y_train)
+    x_test, y_test = cluster_skew(x_test, y_test)
 
-exit(0)
 def to_tensor(x_train, y_train):
     tensor_x = torch.Tensor(x_train) # transform to torch tensor
     tensor_y = torch.Tensor(y_train)
@@ -190,10 +214,6 @@ def to_tensor(x_train, y_train):
 
 train_set = to_tensor(x_train, y_train)
 test_set = to_tensor(x_test, y_test)
-
-print(y_train)
-print(x_train.shape)
-exit(0)
 
 def load_datasets(train_set, test_set):
     trainloader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True)

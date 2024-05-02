@@ -38,6 +38,7 @@ SCENARIO = int(sys.argv[4])
 SCENARIO_IID = int(1)
 SCENARIO_Quantity_Skew = int(2)
 SCENARIO_Label_Skew = int(3)
+SCENARIO_Cluster_Skew = int(4)
 
 # Load datasets
 transform = transforms.Compose(
@@ -85,8 +86,10 @@ def printNumberOfSample(train_datasets):
                 label = "iid"
             case 2:
                 label = "quantity_skew"
-            case _:
+            case 3:
                 label = "label_skew" 
+            case _:
+                label = "cluster_skew" 
                 
         fig.savefig(save_dir / str("cifar10_" + label + ".png"))
 
@@ -104,7 +107,6 @@ if (SCENARIO == SCENARIO_IID):
     trainloader = DataLoader(train_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
     testloader = DataLoader(test_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE)
     printNumberOfSample(train_datasets)
-    exit(0)
     
 elif (SCENARIO == SCENARIO_Quantity_Skew):
     lengths = quantitySkew(len(trainset), NUM_CLIENTS)
@@ -116,9 +118,8 @@ elif (SCENARIO == SCENARIO_Quantity_Skew):
     trainloader = DataLoader(train_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
     testloader = DataLoader(test_datasets[CLIENT_INDEX], batch_size=BATCH_SIZE)
     printNumberOfSample(train_datasets)
-    exit(0)
     
-else:
+elif (SCENARIO == SCENARIO_Label_Skew):
     group_samples_train = [[] for _ in range(NUM_CLIENTS)]
     group_samples_test = [[] for _ in range(NUM_CLIENTS)]
     
@@ -141,7 +142,33 @@ else:
     trainloader = DataLoader(group_samples_train[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
     testloader = DataLoader(group_samples_test[CLIENT_INDEX], batch_size=BATCH_SIZE)
     printNumberOfSample(group_samples_train)
-    exit(0)
+else:
+    classRate = [1, 0.9, 0.35, 0.65, 0.8, 0.2, 0.5, 0.95, 0.4, 0.85]
+
+    group_samples_train = [[] for _ in range(NUM_CLIENTS)]
+    group_samples_test = [[] for _ in range(NUM_CLIENTS)]
+    
+    # Group samples by label for train set
+    for sample, label in trainset:
+        if (random.random() < classRate[label]):
+            if (random.random() > 0.5):
+                group_id = label % NUM_CLIENTS  # Assign the group based on the label
+            else:
+                group_id = random.randint(0, NUM_CLIENTS - 1)
+            group_samples_train[group_id].append((sample, label))
+
+    # Group samples by label for test set
+    for sample, label in testset:
+        if (random.random() < classRate[label]):
+            if (random.random() > 0.5):
+                group_id = label % NUM_CLIENTS  # Assign the group based on the label
+            else:
+                group_id = random.randint(0, NUM_CLIENTS - 1)
+            group_samples_test[group_id].append((sample, label))
+        
+    trainloader = DataLoader(group_samples_train[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
+    testloader = DataLoader(group_samples_test[CLIENT_INDEX], batch_size=BATCH_SIZE)
+    printNumberOfSample(group_samples_train)
     
 class Net(nn.Module):
     def __init__(self):

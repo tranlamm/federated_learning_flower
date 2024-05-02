@@ -3,7 +3,8 @@ if len(sys.argv) < 5: #include run_file + number_client + port + total_time + sa
     print("Not enough argument!")
     exit(0)
     
-sys.path.append('/home/bkcs/Lam_Quang/ppo')
+# sys.path.append('/home/bkcs/Lam_Quang/ppo')
+sys.path.append('C:\\Users\\Admin\\Desktop\\Lab\\Lab_final\\ppo')
 
 from sklearn.preprocessing import normalize
 import pickle
@@ -14,17 +15,17 @@ import flwr as fl
 from ppo import PPOAgent
 
 # Config
-INIT_TIME = 100
-MIN_TIME = 50
-MAX_TIME = 150
+INIT_TIME = 2
+MIN_TIME = 1
+MAX_TIME = 5
 CUR_TOTAL_TIME = 0
 FIXED_TOTAL_TIME = int(sys.argv[3])
 NUM_CLIENTS = int(sys.argv[1])
 NUM_ROUNDS = 100000
-FRACTION_FIT = 0.8
+FRACTION_FIT = 1
 state_dims = 3 * int(NUM_CLIENTS * FRACTION_FIT) + 1
 action_dims = 3
-BATCH_SIZE = 64
+BATCH_SIZE = 2
 alpha = 0.01
 
 # Variable

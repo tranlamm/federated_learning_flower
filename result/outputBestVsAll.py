@@ -16,11 +16,12 @@ if not isCifar:
         save_dir = this_dir / "final_result" / "full" / "gquic256_all"
     else:
         save_dir = this_dir / "final_result" / "zoom" / "gquic256_all"
-    list_method = ["gquic256_dql_epsilon_greedy", 
-                "gquic256_ddpg_ucb1", 
-                "gquic256_ddpg_epsilon_greedy", 
-                "gquic256_sac",
-                "gquic256_ppo"]
+    list_method = [
+                "dql_epsilon_gquic256",
+                "ddpg_gquic256_latest",
+                "ppo_gquic_256_latest",
+                "gquic_256_sac_new",
+                ]
 else:
     output_dir = this_dir / "cifar10_saved_new"
     if (isFull):
@@ -35,10 +36,17 @@ else:
                "cifar_10_ppo",
                "cifar_10_sac"]
 
-fig_loss, f_loss = plt.subplots(figsize=(10,6))
-fig_acc, f_acc = plt.subplots(figsize=(10,6))
-fig_reward, f_reward = plt.subplots(figsize=(10,6))
-fig_time, f_time = plt.subplots(figsize=(10,6))
+fig_loss, f_loss = plt.subplots(figsize=(14,8))
+fig_acc, f_acc = plt.subplots(figsize=(14,8))
+fig_reward, f_reward = plt.subplots(figsize=(14,8))
+fig_time, f_time = plt.subplots(figsize=(14,8))
+
+objName = {
+    "dql_epsilon_gquic256" : "DQL",
+    "ddpg_gquic256_latest" : "DDPG",
+    "ppo_gquic_256_latest" : "PPO",
+    "gquic_256_sac_new" : "SAC",
+}
 
 for method in list_method:
     specific_output_dir = output_dir / method
@@ -67,14 +75,15 @@ for method in list_method:
         time.append(sum)
     time = np.array(time)
     
-    f_loss.plot(time, loss, label=method)
-    f_acc.plot(time, acc, label=method)
-    f_reward.plot(time, reward, label=method)
-    f_time.plot(round, train_time, label=method)
+    f_loss.plot(time, loss, label=objName[method])
+    f_acc.plot(time, acc, label=objName[method])
+    f_reward.plot(time, reward, label=objName[method])
+    f_time.plot(round, train_time, label=objName[method])
     
+    # LOSS
 f_loss.set_xlabel('Time')
 f_loss.set_ylabel('Loss')
-f_loss.set_title('Training Loss')
+# f_loss.set_title('Training Loss')
 if not isFull:
     if not isCifar:
         f_loss.set_ylim(0.0148, 0.017)
@@ -84,28 +93,38 @@ if not isFull:
 f_loss.legend()
 fig_loss.savefig(save_dir / "training_loss.png")
 
-f_acc.set_xlabel('Time')
-f_acc.set_ylabel('Acc')
-f_acc.set_title('Training acc')
+    # ACCURACY 
+f_acc.set_xlabel('Time', fontsize="24")
+f_acc.xaxis.set_tick_params(labelsize=20)
+f_acc.xaxis.set_label_coords(0.5, -0.09)
+f_acc.set_ylabel('Accuracy', fontsize="24")
+f_acc.yaxis.set_tick_params(labelsize=20)
+f_acc.yaxis.set_label_coords(-0.1, 0.5)
+# f_acc.set_title('Training acc')
 if not isFull:
     if not isCifar:
-        f_acc.set_ylim(0.85, 1)
+        f_acc.set_ylim(0.75, 0.92)
     else:
         f_acc.set_ylim(0.8, 1.01)
         f_acc.set_xlim(10000)
-f_acc.legend()
+f_acc.legend(loc = "lower right", fontsize="26")
 fig_acc.savefig(save_dir / "training_acc.png")
 
-f_reward.set_xlabel('Time')
-f_reward.set_ylabel('Reward')
-f_reward.set_title('Training reward')
+    # REWARD 
+f_reward.set_xlabel('Time', fontsize="24")
+f_reward.xaxis.set_tick_params(labelsize=20)
+f_reward.xaxis.set_label_coords(0.5, -0.09)
+f_reward.set_ylabel('Reward', fontsize="24")
+f_reward.yaxis.set_tick_params(labelsize=17)
+f_reward.yaxis.set_label_coords(-0.125, 0.5)
+# f_reward.set_title('Training reward')
 if not isFull:
     if not isCifar:
-        f_reward.set_ylim(-0.017, -0.015)
+        f_reward.set_ylim(-0.02, -0.0155)
     else:
         f_reward.set_ylim(-0.0075, 0)
         f_reward.set_xlim(10000)
-f_reward.legend()
+f_reward.legend(loc = "lower right", fontsize="26")
 fig_reward.savefig(save_dir / "training_reward.png")
 
 # f_time.set_xlabel('Round')

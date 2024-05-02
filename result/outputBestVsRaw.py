@@ -16,10 +16,12 @@ if not isCifar:
         save_dir = this_dir / "final_result" / "full" / "gquic256"
     else:
         save_dir = this_dir / "final_result" / "zoom" / "gquic256"
-    list_method = ["gquic256_raw_50", 
-               "gquic_256_raw_100s_", 
-               "gquic_256_raw_150s_", 
-               "gquic256_ppo"]
+    list_method = [ 
+                "raw_guic256_50s", 
+                "raw_guic256_100s", 
+                "raw_gquic256_150s",
+                "gquic_256_sac_new",
+               ]
 else:
     output_dir = this_dir / "cifar10_saved_new"
     if (isFull):
@@ -30,11 +32,19 @@ else:
                "cifar_10_raw_100", 
                "cifar_10_raw_150", 
                "cifar_10_sac"]
+    
+objName = {
+    "raw_guic256_50s" : "Fixed 50 seconds training time per round",
+    "raw_guic256_100s" : "Fixed 100 seconds training time per round",
+    "raw_gquic256_150s" : "Fixed 150 seconds training time per round",
+    "gquic_256_sac_new" : "Soft Actor Critic (SAC)",
+}
 
-fig_loss, f_loss = plt.subplots(figsize=(10,6))
-fig_acc, f_acc = plt.subplots(figsize=(10,6))
-fig_reward, f_reward = plt.subplots(figsize=(10,6))
-fig_time, f_time = plt.subplots(figsize=(10,6))
+fig_loss, f_loss = plt.subplots(figsize=(14,8))
+fig_acc, f_acc = plt.subplots(figsize=(14,8))
+fig_reward, f_reward = plt.subplots(figsize=(14,8))
+fig_time, f_time = plt.subplots(figsize=(14,8))
+fig_time2, f_time2 = plt.subplots(figsize=(14,8))
 
 for method in list_method:
     specific_output_dir = output_dir / method
@@ -63,14 +73,30 @@ for method in list_method:
         time.append(sum)
     time = np.array(time)
     
-    f_loss.plot(time, loss, label=method)
-    f_acc.plot(time, acc, label=method)
-    f_reward.plot(time, reward, label=method)
-    f_time.plot(round, train_time, label=method)
+    tmp = 0
+    cnt = 0
+    listTime = []
+    for i in range(80000):
+        if cnt == len(train_time):
+            break
+        if tmp < train_time[cnt]:
+            tmp += 1
+        else:
+            cnt += 1
+            tmp = 0
+        listTime.append(cnt)
     
+    listTimeIdx = [i for i in range(0, len(listTime))]
+    f_loss.plot(time, loss, label=objName[method])
+    f_acc.plot(time, acc, label=objName[method])
+    f_reward.plot(time, reward, label=objName[method])
+    f_time.plot(round, train_time, label=objName[method])
+    f_time2.plot(listTimeIdx, listTime, label=objName[method])
+    
+    # LOSS
 f_loss.set_xlabel('Time')
 f_loss.set_ylabel('Loss')
-f_loss.set_title('Training Loss')
+# f_loss.set_title('Training Loss')
 if not isFull:
     if not isCifar:
         f_loss.set_ylim(0.0148, 0.02)
@@ -79,26 +105,36 @@ if not isFull:
 f_loss.legend()
 fig_loss.savefig(save_dir / "training_loss.png")
 
-f_acc.set_xlabel('Time')
-f_acc.set_ylabel('Acc')
-f_acc.set_title('Training acc')
+    # ACCURACY 
+f_acc.set_xlabel('Time', fontsize="24")
+f_acc.xaxis.set_tick_params(labelsize=20)
+f_acc.xaxis.set_label_coords(0.5, -0.09)
+f_acc.set_ylabel('Accuracy', fontsize="24")
+f_acc.yaxis.set_tick_params(labelsize=20)
+f_acc.yaxis.set_label_coords(-0.1, 0.5)
+# f_acc.set_title('Training acc')
 if not isFull:
     if not isCifar:
-        f_acc.set_ylim(0.8, 1)
+        f_acc.set_ylim(0.75, 0.92)
     else:
         f_acc.set_ylim(0.5, 1.01)
-f_acc.legend()
+f_acc.legend(loc = "lower right", fontsize="24")
 fig_acc.savefig(save_dir / "training_acc.png")
 
-f_reward.set_xlabel('Time')
-f_reward.set_ylabel('Reward')
-f_reward.set_title('Training reward')
+    # REWARD 
+f_reward.set_xlabel('Time', fontsize="24")
+f_reward.xaxis.set_tick_params(labelsize=20)
+f_reward.xaxis.set_label_coords(0.5, -0.09)
+f_reward.set_ylabel('Reward', fontsize="24")
+f_reward.yaxis.set_tick_params(labelsize=17)
+f_reward.yaxis.set_label_coords(-0.125, 0.5)
+# f_reward.set_title('Training reward')
 if not isFull:
     if not isCifar:
-        f_reward.set_ylim(-0.02, -0.014)
+        f_reward.set_ylim(-0.02, -0.0155)
     else:
         f_reward.set_ylim(-0.02, 0.0001)
-f_reward.legend()
+f_reward.legend(loc = "lower right", fontsize="24")
 fig_reward.savefig(save_dir / "training_reward.png")
 
 # f_time.set_xlabel('Round')
@@ -106,3 +142,9 @@ fig_reward.savefig(save_dir / "training_reward.png")
 # f_time.set_title('Training time per round')
 # f_time.legend()
 # fig_time.savefig(save_dir / "training_time_per_round.png")
+
+# f_time2.set_xlabel('Time')
+# f_time2.set_ylabel('Epoch')
+# f_time2.set_title('Number epoch')
+# f_time2.legend()
+# fig_time2.savefig(save_dir / "epoch.png")

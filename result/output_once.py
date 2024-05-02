@@ -9,7 +9,7 @@ import numpy as np
 from pathlib import Path
 
 this_dir = Path.cwd()
-output_dir = this_dir / "flower_saved" / str(sys.argv[1])
+output_dir = this_dir / "gquic256_saved_new" / str(sys.argv[1])
 loss_file = str(output_dir) + '/val_loss.pkl'
 acc_file = str(output_dir) + '/val_acc.pkl'
 time_file = str(output_dir) + '/train_time.pkl'
