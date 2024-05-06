@@ -17,6 +17,7 @@ list_method = [
                "cifar10_raw_50_noniid_label_skew",
                "cifar10_raw_100_noniid_label_skew",
                "cifar10_raw_150_noniid_label_skew",
+               "cifar10_raw_100_noniid_cluster_skew",
                "cifar10_ppo_noniid_label_skew"
                ]
 
