@@ -8,18 +8,16 @@ this_dir = Path.cwd()
 output_dir = this_dir / "cifar10_saved_new"
 save_dir = this_dir / "final_result" / "non_iid"
 list_method = [
-               "cifar_10_raw_50", 
-               "cifar_10_raw_100", 
-               "cifar_10_raw_150", 
-               "cifar10_raw_50_noniid_quantity_skew", 
-               "cifar10_raw_100_noniid_quantity_skew", 
-               "cifar10_raw_150_noniid_quantity_skew",
-               "cifar10_raw_50_noniid_label_skew",
-               "cifar10_raw_100_noniid_label_skew",
-               "cifar10_raw_150_noniid_label_skew",
+               "cifar10_sac_cluster_skew",
                "cifar10_raw_50_noniid_cluster_skew",
                "cifar10_raw_100_noniid_cluster_skew",
                "cifar10_raw_150_noniid_cluster_skew",
+               "cifar10_sac_label_skew",
+               "cifar10_raw_100_noniid_label_skew",
+               "cifar10_raw_150_noniid_label_skew",
+               "cifar10_raw_50_noniid_quantity_skew", 
+               "cifar10_raw_100_noniid_quantity_skew", 
+               "cifar10_raw_150_noniid_quantity_skew",
                ]
 
 # output_dir = this_dir / "gquic256_saved_new"
