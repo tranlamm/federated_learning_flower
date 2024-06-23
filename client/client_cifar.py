@@ -67,7 +67,7 @@ def printNumberOfSample(train_datasets):
 
         # Plot each category as a stacked bar
         bottom = np.zeros(NUM_CLIENTS)
-        colors = [generate_random_color() for _ in range(NUM_CLASSES)]
+        colors = ['#cec266', '#5b757f', '#442c80', '#c42dfa', '#66d76e', '#bfc66c', '#4dec5b', '#ad2a2c', '#f0a1ce', '#158903']
         for i in range(NUM_CLASSES):
             ax.bar(clients, sample_record[:, i], bottom=bottom, label=f'{classes[i]}', color=colors[i])
             bottom += sample_record[:, i]
@@ -76,8 +76,8 @@ def printNumberOfSample(train_datasets):
         ax.set_xlabel('Clients')
         ax.set_ylabel('Samples')
         ax.set_title('Client datasets distribution')
-        ax.legend()
-        plt.xticks(rotation=45)
+        ax.legend(loc = "upper right")
+        # plt.xticks(rotation=45)
         this_dir = Path.cwd()
         save_dir = this_dir / "client_sample"
         label = None
@@ -169,6 +169,8 @@ else:
     trainloader = DataLoader(group_samples_train[CLIENT_INDEX], batch_size=BATCH_SIZE, shuffle=True)
     testloader = DataLoader(group_samples_test[CLIENT_INDEX], batch_size=BATCH_SIZE)
     printNumberOfSample(group_samples_train)
+    
+exit(0)
     
 class Net(nn.Module):
     def __init__(self):

@@ -8,17 +8,18 @@ this_dir = Path.cwd()
 output_dir = this_dir / "cifar10_saved_new"
 save_dir = this_dir / "final_result" / "non_iid"
 list_method = [
-            #    "cifar_10_raw_50", 
-            #    "cifar_10_raw_100", 
-            #    "cifar_10_raw_150", 
+               "cifar_10_raw_50", 
+               "cifar_10_raw_100", 
+               "cifar_10_raw_150", 
                "cifar10_raw_50_noniid_quantity_skew", 
                "cifar10_raw_100_noniid_quantity_skew", 
                "cifar10_raw_150_noniid_quantity_skew",
                "cifar10_raw_50_noniid_label_skew",
                "cifar10_raw_100_noniid_label_skew",
                "cifar10_raw_150_noniid_label_skew",
+               "cifar10_raw_50_noniid_cluster_skew",
                "cifar10_raw_100_noniid_cluster_skew",
-               "cifar10_ppo_noniid_label_skew"
+               "cifar10_raw_150_noniid_cluster_skew",
                ]
 
 # output_dir = this_dir / "gquic256_saved_new"
@@ -31,6 +32,23 @@ list_method = [
 #                "gquic256_ddpg_epsilon_greedy", 
 #                "gquic256_sac",
 #                "gquic256_ppo"]
+
+objName = {
+    "cifar_10_raw_50" : "50s_iid", 
+    "cifar_10_raw_100" : "100s_iid", 
+    "cifar_10_raw_150" : "150s_iid",
+    "cifar10_raw_50_noniid_quantity_skew" : "50s_quantity_skew", 
+    "cifar10_raw_100_noniid_quantity_skew" : "100s_quantity_skew", 
+    "cifar10_raw_150_noniid_quantity_skew" : "150s_quantity_skew",
+    "cifar10_raw_50_noniid_label_skew" : "50s_label_skew",
+    "cifar10_raw_100_noniid_label_skew" : "100s_label_skew",
+    "cifar10_raw_150_noniid_label_skew" : "150s_label_skew",
+    "cifar10_sac_label_skew": "SAC_label_skew",
+    "cifar10_raw_50_noniid_cluster_skew" : "50s_cluster_skew",
+    "cifar10_raw_100_noniid_cluster_skew" : "100s_cluster_skew",
+    "cifar10_raw_150_noniid_cluster_skew" : "150s_cluster_skew",
+    "cifar10_sac_cluster_skew" : "SAC_cluster_skew"
+}
 
 fig_loss, f_loss = plt.subplots(figsize=(10,6))
 fig_acc, f_acc = plt.subplots(figsize=(10,6))
@@ -64,10 +82,10 @@ for method in list_method:
         time.append(sum)
     time = np.array(time)
     
-    f_loss.plot(time, loss, label=method)
-    f_acc.plot(time, acc, label=method)
-    f_reward.plot(time, reward, label=method)
-    f_time.plot(round, train_time, label=method)
+    f_loss.plot(time, loss, label=objName[method])
+    f_acc.plot(time, acc, label=objName[method])
+    f_reward.plot(time, reward, label=objName[method])
+    f_time.plot(round, train_time, label=objName[method])
     
 f_loss.set_xlabel('Time')
 f_loss.set_ylabel('Loss')

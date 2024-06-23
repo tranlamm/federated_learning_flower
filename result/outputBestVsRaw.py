@@ -10,6 +10,7 @@ from pathlib import Path
 this_dir = Path.cwd()
 isFull = int(sys.argv[1])
 isCifar = int(sys.argv[2])
+font = 26
 if not isCifar:
     output_dir = this_dir / "gquic256_saved_new"
     if (isFull):
@@ -17,10 +18,10 @@ if not isCifar:
     else:
         save_dir = this_dir / "final_result" / "zoom" / "gquic256"
     list_method = [ 
-                "raw_guic256_50s", 
-                "raw_guic256_100s", 
+                "raw_gquic256_50s", 
+                "raw_gquic256_100s", 
                 "raw_gquic256_150s",
-                "gquic_256_sac_new",
+                "sac_gquic256_latest",
                ]
 else:
     output_dir = this_dir / "cifar10_saved_new"
@@ -32,12 +33,18 @@ else:
                "cifar_10_raw_100", 
                "cifar_10_raw_150", 
                "cifar_10_sac"]
+    font = 17
     
 objName = {
-    "raw_guic256_50s" : "Fixed 50 seconds training time per round",
-    "raw_guic256_100s" : "Fixed 100 seconds training time per round",
+    "raw_gquic256_50s" : "Fixed 50 seconds training time per round",
+    "raw_gquic256_100s" : "Fixed 100 seconds training time per round",
     "raw_gquic256_150s" : "Fixed 150 seconds training time per round",
-    "gquic_256_sac_new" : "Soft Actor Critic (SAC)",
+    "sac_gquic256_latest" : "Soft Actor Critic (SAC)",
+    
+    "cifar_10_raw_50" : "Fixed 50 seconds training time per round",
+    "cifar_10_raw_100" : "Fixed 100 seconds training time per round",
+    "cifar_10_raw_150" : "Fixed 150 seconds training time per round",
+    "cifar_10_sac" : "Soft Actor Critic (SAC)",
 }
 
 fig_loss, f_loss = plt.subplots(figsize=(14,8))
@@ -68,9 +75,12 @@ for method in list_method:
     round = np.arange(1, len(train_time) + 1)
     sum = 0
     time = []
+    index = 0
     for x in train_time:
         sum += x
         time.append(sum)
+        if sum < 40000:
+            index += 1
     time = np.array(time)
     
     tmp = 0
@@ -85,6 +95,8 @@ for method in list_method:
             cnt += 1
             tmp = 0
         listTime.append(cnt)
+        
+    print(objName[method] + " " + str(index) + " " + str(acc[index]) + " " + str(reward[index]))
     
     listTimeIdx = [i for i in range(0, len(listTime))]
     f_loss.plot(time, loss, label=objName[method])
@@ -94,15 +106,19 @@ for method in list_method:
     f_time2.plot(listTimeIdx, listTime, label=objName[method])
     
     # LOSS
-f_loss.set_xlabel('Time')
-f_loss.set_ylabel('Loss')
+f_loss.set_xlabel('Time', fontsize="24")
+f_loss.xaxis.set_tick_params(labelsize=20)
+f_loss.xaxis.set_label_coords(0.5, -0.09)
+f_loss.set_ylabel('Loss', fontsize="24")
+f_loss.yaxis.set_tick_params(labelsize=20)
+f_loss.yaxis.set_label_coords(-0.125, 0.5)
 # f_loss.set_title('Training Loss')
 if not isFull:
     if not isCifar:
-        f_loss.set_ylim(0.0148, 0.02)
+        f_loss.set_ylim(0.0157, 0.020)
     else:
         f_loss.set_ylim(-0.0005, 0.02)
-f_loss.legend()
+f_loss.legend(loc = "upper right", fontsize=str(font))
 fig_loss.savefig(save_dir / "training_loss.png")
 
     # ACCURACY 
@@ -118,7 +134,7 @@ if not isFull:
         f_acc.set_ylim(0.75, 0.92)
     else:
         f_acc.set_ylim(0.5, 1.01)
-f_acc.legend(loc = "lower right", fontsize="24")
+f_acc.legend(loc = "lower right", fontsize=str(font))
 fig_acc.savefig(save_dir / "training_acc.png")
 
     # REWARD 
@@ -134,7 +150,7 @@ if not isFull:
         f_reward.set_ylim(-0.02, -0.0155)
     else:
         f_reward.set_ylim(-0.02, 0.0001)
-f_reward.legend(loc = "lower right", fontsize="24")
+f_reward.legend(loc = "lower right", fontsize=str(font))
 fig_reward.savefig(save_dir / "training_reward.png")
 
 # f_time.set_xlabel('Round')

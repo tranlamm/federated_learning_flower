@@ -73,7 +73,7 @@ def printNumberOfSample(label_set):
 
         # Plot each category as a stacked bar
         bottom = np.zeros(NUM_CLIENTS)
-        colors = [generate_random_color() for _ in range(NUM_CLASSES)]
+        colors = ['#bfc66c', '#4dec5b', '#ad2a2c', '#f0a1ce', '#158903']
         for i in range(NUM_CLASSES):
             ax.bar(clients, sample_record[:, i], bottom=bottom, label=f'{classes[i]}', color=colors[i])
             bottom += sample_record[:, i]
@@ -82,8 +82,8 @@ def printNumberOfSample(label_set):
         ax.set_xlabel('Clients')
         ax.set_ylabel('Samples')
         ax.set_title('Client datasets distribution')
-        ax.legend()
-        plt.xticks(rotation=45)
+        ax.legend(loc = "upper right")
+        # plt.xticks(rotation=45)
         this_dir = Path.cwd()
         save_dir = this_dir / "client_sample"
         label = None
@@ -203,6 +203,8 @@ elif (SCENARIO == SCENARIO_Label_Skew):
 else:
     x_train, y_train = cluster_skew(x_train, y_train)
     x_test, y_test = cluster_skew(x_test, y_test)
+    
+exit(0)
 
 def to_tensor(x_train, y_train):
     tensor_x = torch.Tensor(x_train) # transform to torch tensor
